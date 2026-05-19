@@ -1,6 +1,6 @@
 <template>
   <div class="flow-assembly">
-    <BusinessUnitList :flows="flows" :subflows="subflows" :units="units" />
+    <BusinessUnitList :flows="flows" :subflows="subflows" :activities="businessActivities" :units="units" />
     <FlowCanvas
       @node-select="onNodeSelect"
       @graph-ready="onGraphReady"
@@ -17,9 +17,9 @@ import { ref } from 'vue'
 import BusinessUnitList from '../components/BusinessUnitList.vue'
 import FlowCanvas from '../components/FlowCanvas.vue'
 import DetailPanel from '../components/DetailPanel.vue'
-import { flows, subflows, businessUnits } from '../data/businessUnits.js'
+import { flows, subflows, businessActivities, activityUnits } from '../data/businessUnits.js'
 
-const units = businessUnits
+const units = activityUnits
 const selectedNode = ref(null)
 const graph = ref(null)
 

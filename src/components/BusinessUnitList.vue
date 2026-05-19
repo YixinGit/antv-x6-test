@@ -67,17 +67,19 @@ import { computed, reactive } from 'vue'
 const props = defineProps({
   flows: { type: Array, default: () => [] },
   subflows: { type: Array, default: () => [] },
+  activities: { type: Array, default: () => [] },
   units: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['drag-start'])
 
-const totalCount = computed(() => props.flows.length + props.subflows.length + props.units.length)
+const totalCount = computed(() => props.flows.length + props.subflows.length + props.activities.length + props.units.length)
 
 const groups = reactive([
   { key: 'flow', label: '流程', color: '#1e40af', expanded: true, get items() { return props.flows } },
   { key: 'subflow', label: '子流程', color: '#7c3aed', expanded: true, get items() { return props.subflows } },
-  { key: 'unit', label: '业务单元', color: '#6366f1', expanded: true, get items() { return props.units } },
+  { key: 'activity', label: '业务活动', color: '#4f46e5', expanded: true, get items() { return props.activities } },
+  { key: 'unit', label: '活动单元', color: '#6366f1', expanded: true, get items() { return props.units } },
 ])
 
 function onDragStart(event, unit) {

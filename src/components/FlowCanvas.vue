@@ -27,7 +27,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { Graph } from '@antv/x6'
 import { register } from '@antv/x6-vue-shape'
 import CanvasNode from './CanvasNode.vue'
-import { flows, subflows, businessUnits } from '../data/businessUnits.js'
+import { flows, subflows, businessActivities, activityUnits } from '../data/businessUnits.js'
 
 const emit = defineEmits(['node-select', 'graph-ready'])
 
@@ -39,10 +39,11 @@ const zoomPercent = ref(100)
 const NODE_CONFIG = {
   flow: { shape: 'flow-node', width: 260, height: 90 },
   subflow: { shape: 'subflow-node', width: 230, height: 80 },
-  'business-unit': { shape: 'bu-node', width: 200, height: 72 },
+  'business-activity': { shape: 'ba-node', width: 220, height: 76 },
+  'activity-unit': { shape: 'bu-node', width: 200, height: 72 },
 }
 
-const HIERARCHY_LEVEL = { flow: 3, subflow: 2, 'business-unit': 1 }
+const HIERARCHY_LEVEL = { flow: 4, subflow: 3, 'business-activity': 2, 'activity-unit': 1 }
 
 const INDENT_X = 20
 
@@ -50,8 +51,12 @@ function getSubflowsOf(flowId) {
   return subflows.filter((s) => s.parentFlowId === flowId)
 }
 
-function getBUsOf(subflowId) {
-  return businessUnits.filter((bu) => bu.parentSubflowId === subflowId)
+function getBAsOf(subflowId) {
+  return businessActivities.filter((ba) => ba.parentSubflowId === subflowId)
+}
+
+function getBUsOf(baId) {
+  return activityUnits.filter((bu) => bu.parentActivityId === baId)
 }
 
 const toolbarButtons = [
@@ -149,7 +154,7 @@ function resizeAncestors(node) {
   while (parent && parent.isNode && parent.isNode()) {
     const parentData = parent.getData() || {}
     if (parentData.collapsed !== false) break
-    const compact = NODE_CONFIG[parentData.nodeType] || NODE_CONFIG['business-unit']
+    const compact = NODE_CONFIG[parentData.nodeType] || NODE_CONFIG['activity-unit']
     fitParentToChildren(parent, compact)
     parent = parent.getParent()
   }
@@ -159,7 +164,7 @@ function embedChild(parent, child) {
   parent.embed(child)
 
   const parentData = parent.getData() || {}
-  const compact = NODE_CONFIG[parentData.nodeType] || NODE_CONFIG['business-unit']
+  const compact = NODE_CONFIG[parentData.nodeType] || NODE_CONFIG['activity-unit']
   const collapsed = parentData.collapsed !== false
 
   const parentPos = parent.getPosition()
@@ -173,6 +178,20 @@ function embedChild(parent, child) {
 
   if (collapsed) {
     child.hide()
+  }
+
+  // Update parent's childCount in data for reactive badge
+  const children = graph.getNodes().filter((n) => {
+    const p = n.getParent()
+    return p && p.id === parent.id
+  })
+  console.log('[embedChild] parent:', parent.id, 'children:', children.length)
+  parent.setData({ ...parentData, childCount: children.length })
+  // Force VueShapeView to re-render
+  const view = graph.findViewByCell(parent)
+  if (view && view.renderVueComponent) {
+    view.renderVueComponent()
+    console.log('[embedChild] forced re-render')
   }
 
   parent.resize(compact.width, compact.height)
@@ -196,8 +215,8 @@ function createPorts() {
 }
 
 function createNode(itemData) {
-  const config = NODE_CONFIG[itemData.nodeType] || NODE_CONFIG['business-unit']
-  const isBU = itemData.nodeType === 'business-unit'
+  const config = NODE_CONFIG[itemData.nodeType] || NODE_CONFIG['activity-unit']
+  const isBU = itemData.nodeType === 'activity-unit'
   return graph.addNode({
     id: `${itemData.id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     shape: config.shape,
@@ -219,6 +238,13 @@ function buildTree(parent, data) {
       buildTree(subNode, subData)
     })
   } else if (data.nodeType === 'subflow') {
+    const childBAs = getBAsOf(data.id)
+    childBAs.forEach((baData) => {
+      const baNode = createNode(baData)
+      embedChild(parent, baNode)
+      buildTree(baNode, baData)
+    })
+  } else if (data.nodeType === 'business-activity') {
     const childBUs = getBUsOf(data.id)
     childBUs.forEach((buData) => {
       const buNode = createNode(buData)
@@ -235,7 +261,7 @@ function onDrop(event) {
   const json = event.dataTransfer.getData('application/json')
   if (!json || !graph) return
   const data = JSON.parse(json)
-  const config = NODE_CONFIG[data.nodeType] || NODE_CONFIG['business-unit']
+  const config = NODE_CONFIG[data.nodeType] || NODE_CONFIG['activity-unit']
   const point = graph.clientToLocal(event.clientX, event.clientY)
   const container = findContainerAtPoint(point)
 
@@ -310,6 +336,12 @@ onMounted(() => {
     height: 80,
   })
   register({
+    shape: 'ba-node',
+    component: CanvasNode,
+    width: 220,
+    height: 76,
+  })
+  register({
     shape: 'bu-node',
     component: CanvasNode,
     width: 200,
@@ -361,7 +393,7 @@ onMounted(() => {
         if (sourceCell.id === targetCell.id) return false
         const sourceType = sourceCell.getData()?.nodeType
         const targetType = targetCell.getData()?.nodeType
-        return sourceType === 'business-unit' && targetType === 'business-unit'
+        return sourceType === 'activity-unit' && targetType === 'activity-unit'
       },
     },
     highlighting: {
@@ -421,7 +453,7 @@ onMounted(() => {
   // Expose layout for CanvasNode toggle
   graph.layoutDescendants = (node) => {
     const data = node.getData() || {}
-    const compact = NODE_CONFIG[data.nodeType] || NODE_CONFIG['business-unit']
+    const compact = NODE_CONFIG[data.nodeType] || NODE_CONFIG['activity-unit']
     // Need to call CanvasNode's layoutNode — use custom event
     graph.trigger('custom:layout', { node, compact })
   }

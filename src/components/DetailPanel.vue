@@ -9,7 +9,7 @@
             <span class="type-badge" :class="data.nodeType" :style="{ background: data.color + '18', color: data.color }">
               {{ typeLabel }}
             </span>
-            <template v-if="data.nodeType === 'business-unit'">
+            <template v-if="data.nodeType === 'activity-unit'">
               <span class="category-tag" :style="{ background: data.color + '10', color: data.color + 'cc' }">
                 {{ data.category }}
               </span>
@@ -60,7 +60,7 @@
         </div>
 
         <div
-          v-if="data.nodeType === 'flow' || data.nodeType === 'subflow'"
+          v-if="data.nodeType === 'flow' || data.nodeType === 'subflow' || data.nodeType === 'business-activity'"
           class="info-section"
         >
           <h3 class="section-title">层级统计</h3>
@@ -71,7 +71,7 @@
             </div>
             <div class="stat-item">
               <span class="stat-num">{{ data.unitCount || 0 }}</span>
-              <span class="stat-label">业务单元</span>
+              <span class="stat-label">活动单元</span>
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@
           </div>
         </div>
 
-        <template v-if="data.nodeType === 'business-unit'">
+        <template v-if="data.nodeType === 'activity-unit'">
           <div v-if="data.inputs?.length" class="info-section">
             <h3 class="section-title">输入</h3>
             <div class="tag-list">
@@ -166,7 +166,8 @@ const typeLabel = computed(() => {
   switch (data.value?.nodeType) {
     case 'flow': return '流程'
     case 'subflow': return '子流程'
-    default: return '业务单元'
+    case 'business-activity': return '业务活动'
+    default: return '活动单元'
   }
 })
 

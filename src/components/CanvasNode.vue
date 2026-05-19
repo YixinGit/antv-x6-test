@@ -41,7 +41,7 @@ const props = defineProps({
 const data = computed(() => props.node.getData() || {})
 
 const isContainer = computed(() =>
-  data.value.nodeType === 'flow' || data.value.nodeType === 'subflow'
+  data.value.nodeType === 'flow' || data.value.nodeType === 'subflow' || data.value.nodeType === 'business-activity'
 )
 
 const collapsed = computed(() => data.value.collapsed !== false)
@@ -56,7 +56,9 @@ function getChildrenOf(node) {
 }
 
 const childCount = computed(() => {
-  return getChildrenOf(props.node).length
+  const c = data.value.childCount || 0
+  console.log('[childCount]', props.node.id, 'data.childCount:', data.value.childCount, 'result:', c)
+  return c
 })
 
 const nodeStyle = computed(() => ({
@@ -67,7 +69,8 @@ const nodeTypeLabel = computed(() => {
   switch (data.value.nodeType) {
     case 'flow': return '流程'
     case 'subflow': return '子流程'
-    default: return data.value.category || '业务单元'
+    case 'business-activity': return '业务活动'
+    default: return data.value.category || '活动单元'
   }
 })
 
@@ -75,6 +78,7 @@ const nodeTypeIcon = computed(() => {
   switch (data.value.nodeType) {
     case 'flow': return '⚙'
     case 'subflow': return '⊞'
+    case 'business-activity': return '⊡'
     default: return data.value.name?.charAt(0) || '?'
   }
 })
@@ -82,6 +86,7 @@ const nodeTypeIcon = computed(() => {
 const COMPACT = {
   flow: { width: 260, height: 90 },
   subflow: { width: 230, height: 80 },
+  'business-activity': { width: 220, height: 76 },
 }
 
 function onToggle() {
@@ -193,8 +198,14 @@ function layoutNode(node, compact, skipCascade = false) {
   border-radius: 10px;
 }
 
-.canvas-node.business-unit {
+.canvas-node.activity-unit {
   border-style: solid;
+}
+
+.canvas-node.business-activity {
+  border-style: dashed;
+  border-width: 2px;
+  border-radius: 10px;
 }
 
 .node-accent {
