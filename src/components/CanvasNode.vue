@@ -108,6 +108,9 @@ function hideDescendants(node) {
 }
 
 function layoutNode(node, compact, skipCascade = false) {
+  const graph = props.graph
+  graph._suppressAutoResize = true
+
   const currentData = node.getData() || {}
   const collapsed = currentData.collapsed !== false
   const children = getChildrenOf(node)
@@ -120,6 +123,7 @@ function layoutNode(node, compact, skipCascade = false) {
   } else {
     const parentPos = node.getPosition()
     let offsetY = compact.height + 10
+    let maxRight = compact.width
     children.forEach((child) => {
       child.setPosition({
         x: parentPos.x + 20,
@@ -132,14 +136,17 @@ function layoutNode(node, compact, skipCascade = false) {
         hideDescendants(child)
         child.resize(childCompact.width, childCompact.height)
       } else {
-        // Expanded child: re-layout descendants without cascading back
         layoutNode(child, childCompact, true)
       }
+      const childRight = 20 + child.getSize().width
+      if (childRight > maxRight) maxRight = childRight
       offsetY += child.getSize().height + 8
     })
     const expandedH = offsetY - 8 + 16
-    node.resize(compact.width, expandedH)
+    node.resize(Math.max(compact.width, maxRight + 16), expandedH)
   }
+
+  graph._suppressAutoResize = false
 
   if (!skipCascade) {
     const parent = node.getParent()

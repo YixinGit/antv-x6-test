@@ -118,6 +118,43 @@ function findContainerAtPoint(point) {
   return null
 }
 
+function fitParentToChildren(parent, compact) {
+  const children = graph.getNodes().filter((n) => {
+    const p = n.getParent()
+    return p && p.id === parent.id && n.isVisible()
+  })
+  if (children.length === 0) {
+    parent.resize(compact.width, compact.height)
+    return
+  }
+  const parentPos = parent.getPosition()
+  let maxY = compact.height
+  let maxRight = compact.width
+  children.forEach((c) => {
+    const relativeX = c.getPosition().x - parentPos.x
+    const relativeY = c.getPosition().y - parentPos.y
+    const right = relativeX + c.getSize().width
+    const bottom = relativeY + c.getSize().height
+    if (right > maxRight) maxRight = right
+    if (bottom > maxY) maxY = bottom
+  })
+  parent.resize(
+    Math.max(compact.width, maxRight + 16),
+    Math.max(compact.height, maxY + 16),
+  )
+}
+
+function resizeAncestors(node) {
+  let parent = node.getParent()
+  while (parent && parent.isNode && parent.isNode()) {
+    const parentData = parent.getData() || {}
+    if (parentData.collapsed !== false) break
+    const compact = NODE_CONFIG[parentData.nodeType] || NODE_CONFIG['business-unit']
+    fitParentToChildren(parent, compact)
+    parent = parent.getParent()
+  }
+}
+
 function embedChild(parent, child) {
   parent.embed(child)
 
@@ -373,6 +410,21 @@ onMounted(() => {
 
   graph.on('scale', updateZoom)
   graph.on('translate', updateZoom)
+
+  graph._suppressAutoResize = false
+  graph.on('node:change:position', ({ cell }) => {
+    if (!graph._suppressAutoResize) {
+      resizeAncestors(cell)
+    }
+  })
+
+  // Expose layout for CanvasNode toggle
+  graph.layoutDescendants = (node) => {
+    const data = node.getData() || {}
+    const compact = NODE_CONFIG[data.nodeType] || NODE_CONFIG['business-unit']
+    // Need to call CanvasNode's layoutNode — use custom event
+    graph.trigger('custom:layout', { node, compact })
+  }
 
   emit('graph-ready', graph)
 })
