@@ -24,7 +24,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Graph } from '@antv/x6'
+import { Graph, History } from '@antv/x6'
 import { register } from '@antv/x6-vue-shape'
 import CanvasNode from './CanvasNode.vue'
 import { flows, subflows, businessActivities, activityUnits } from '../data/businessUnits.js'
@@ -407,14 +407,21 @@ onMounted(() => {
       },
     },
     snapline: true,
-    keyboard: { enabled: true },
-    history: { enabled: true, ignoreAdd: false, ignoreRemove: false, ignoreChange: true },
     selecting: {
       enabled: true,
       rubberband: true,
       showNodeSelectionBox: true,
     },
   })
+
+  graph.use(
+    new History({
+      enabled: true,
+      ignoreAdd: false,
+      ignoreRemove: false,
+      ignoreChange: false,
+    }),
+  )
 
   graph.on('node:click', ({ node }) => {
     emit('node-select', node)

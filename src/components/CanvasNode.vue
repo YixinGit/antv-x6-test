@@ -91,12 +91,15 @@ const COMPACT = {
 
 function onToggle() {
   const node = props.node
+  const graph = props.graph
   const currentData = node.getData() || {}
   const willCollapse = !(currentData.collapsed !== false)
   const compact = COMPACT[currentData.nodeType] || { width: 200, height: 72 }
 
   node.setData({ ...currentData, collapsed: willCollapse }, { silent: true })
+  graph.startBatch('toggle')
   layoutNode(node, compact)
+  graph.stopBatch('toggle')
 }
 
 function hideDescendants(node) {
