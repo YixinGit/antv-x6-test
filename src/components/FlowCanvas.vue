@@ -26,6 +26,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Graph, History } from '@antv/x6'
 import { register } from '@antv/x6-vue-shape'
+import { DagreLayout } from '@antv/layout'
 import CanvasNode from './CanvasNode.vue'
 import { flows, subflows, businessActivities, activityUnits } from '../data/businessUnits.js'
 
@@ -98,6 +99,12 @@ const toolbarButtons = [
       const cells = graph?.getSelectedCells()
       if (cells?.length) graph?.removeCells(cells)
     },
+  },
+  {
+    key: 'auto-layout',
+    title: '自动布局',
+    icon: '⊞',
+    action: () => autoLayout(),
   },
 ]
 
@@ -251,6 +258,58 @@ function buildTree(parent, data) {
       embedChild(parent, buNode)
     })
   }
+}
+
+async function autoLayout() {
+  if (!graph) return
+
+  const rootNodes = graph.getNodes().filter((n) => !n.getParent())
+  if (rootNodes.length === 0) return
+
+  const rootIds = new Set(rootNodes.map((n) => n.id))
+  const edges = graph.getEdges().filter((e) => {
+    const sid = e.getSourceCellId()
+    const tid = e.getTargetCellId()
+    return sid && tid && rootIds.has(sid) && rootIds.has(tid)
+  })
+
+  const dagreLayout = new DagreLayout({
+    type: 'dagre',
+    rankdir: 'TB',
+    align: 'UL',
+    ranksep: 120,
+    nodesep: 60,
+    marginx: 20,
+    marginy: 20,
+    nodeSize: (d) => [d.width || 200, d.height || 72],
+  })
+
+  await dagreLayout.execute({
+    nodes: rootNodes.map((n) => ({
+      id: n.id,
+      width: n.getSize().width,
+      height: n.getSize().height,
+    })),
+    edges: edges.map((e) => ({
+      source: e.getSourceCellId(),
+      target: e.getTargetCellId(),
+    })),
+  })
+
+  graph.startBatch('auto-layout')
+  dagreLayout.model.nodes().forEach((layoutNode) => {
+    if (layoutNode.x == null || layoutNode.y == null) return
+    const node = rootNodes.find((n) => n.id === layoutNode.id)
+    if (node) {
+      node.setPosition(
+        { x: layoutNode.x, y: layoutNode.y },
+        { deep: true },
+      )
+    }
+  })
+  graph.stopBatch('auto-layout')
+
+  graph.zoomToFit({ padding: 40, maxScale: 1 })
 }
 
 function onDragOver(event) {
