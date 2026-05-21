@@ -18,6 +18,16 @@
         >
           依赖关系
         </button>
+        <span class="action-divider"></span>
+        <button class="action-btn" @click="zoomOut" title="缩小">
+          <el-icon><ZoomOut /></el-icon>
+        </button>
+        <button class="action-btn" @click="zoomIn" title="放大">
+          <el-icon><ZoomIn /></el-icon>
+        </button>
+        <button class="action-btn" @click="zoomReset" title="重置">
+          适应
+        </button>
       </div>
     </div>
     <div class="gantt-body">
@@ -58,45 +68,45 @@ const records = [
   {
     id: 'flow-1',
     title: '用户生命周期管理',
-    start: '2024-08-01',
-    end: '2024-08-15',
-    duration: '14天',
-    progress: 50,
+    start: '2024-06-01',
+    end: '2024-09-30',
+    duration: '90天',
+    progress: 60,
     isCritical: true,
     children: [
       {
         id: 'sub-1',
         title: '注册认证子流程',
-        start: '2024-08-01',
-        end: '2024-08-08',
-        duration: '7天',
-        progress: 75,
+        start: '2024-06-01',
+        end: '2024-07-20',
+        duration: '50天',
+        progress: 85,
         isCritical: false,
         children: [
           {
             id: 'ba-1',
             title: '信息核验',
-            start: '2024-08-01',
-            end: '2024-08-05',
-            duration: '4天',
+            start: '2024-06-01',
+            end: '2024-07-05',
+            duration: '35天',
             progress: 100,
             isCritical: false,
             children: [
               {
                 id: 'unit-1',
                 title: '用户注册',
-                start: '2024-08-01',
-                end: '2024-08-03',
-                duration: '2天',
+                start: '2024-06-01',
+                end: '2024-06-18',
+                duration: '18天',
                 progress: 100,
                 isCritical: false,
               },
               {
                 id: 'unit-4',
                 title: '消息推送',
-                start: '2024-08-03',
-                end: '2024-08-05',
-                duration: '2天',
+                start: '2024-06-18',
+                end: '2024-07-05',
+                duration: '17天',
                 progress: 100,
                 isCritical: false,
               },
@@ -105,10 +115,10 @@ const records = [
           {
             id: 'ba-2',
             title: '账户开通',
-            start: '2024-08-05',
-            end: '2024-08-08',
-            duration: '3天',
-            progress: 30,
+            start: '2024-07-05',
+            end: '2024-07-20',
+            duration: '16天',
+            progress: 50,
             isCritical: false,
           },
         ],
@@ -116,54 +126,54 @@ const records = [
       {
         id: 'sub-2',
         title: '风控审核子流程',
-        start: '2024-08-06',
-        end: '2024-08-15',
-        duration: '9天',
-        progress: 40,
+        start: '2024-07-10',
+        end: '2024-09-30',
+        duration: '82天',
+        progress: 45,
         isCritical: true,
         children: [
           {
             id: 'ba-3',
             title: '风险评估执行',
-            start: '2024-08-06',
-            end: '2024-08-15',
-            duration: '9天',
-            progress: 40,
+            start: '2024-07-10',
+            end: '2024-09-30',
+            duration: '82天',
+            progress: 45,
             isCritical: true,
             children: [
               {
                 id: 'unit-2',
                 title: '风险评估',
-                start: '2024-08-06',
-                end: '2024-08-08',
-                duration: '2天',
-                progress: 60,
+                start: '2024-07-10',
+                end: '2024-07-30',
+                duration: '21天',
+                progress: 70,
                 isCritical: true,
               },
               {
                 id: 'unit-5',
                 title: '数据清洗',
-                start: '2024-08-08',
-                end: '2024-08-10',
-                duration: '2天',
-                progress: 30,
+                start: '2024-07-30',
+                end: '2024-08-20',
+                duration: '22天',
+                progress: 40,
                 isCritical: true,
               },
               {
                 id: 'unit-6',
                 title: '内容审核',
-                start: '2024-08-10',
-                end: '2024-08-12',
-                duration: '2天',
+                start: '2024-08-20',
+                end: '2024-09-10',
+                duration: '22天',
                 progress: 50,
                 isCritical: true,
               },
               {
                 id: 'unit-8',
                 title: '日志归档',
-                start: '2024-08-12',
-                end: '2024-08-15',
-                duration: '3天',
+                start: '2024-09-10',
+                end: '2024-09-30',
+                duration: '21天',
                 progress: 20,
                 isCritical: true,
               },
@@ -176,46 +186,46 @@ const records = [
   {
     id: 'flow-2',
     title: '订单履约流程',
-    start: '2024-08-08',
-    end: '2024-08-20',
-    duration: '12天',
-    progress: 25,
+    start: '2024-07-01',
+    end: '2024-10-31',
+    duration: '92天',
+    progress: 35,
     isCritical: false,
     children: [
       {
         id: 'sub-3',
         title: '支付结算子流程',
-        start: '2024-08-08',
-        end: '2024-08-20',
-        duration: '12天',
-        progress: 25,
+        start: '2024-07-01',
+        end: '2024-10-31',
+        duration: '92天',
+        progress: 35,
         isCritical: false,
         children: [
           {
             id: 'ba-4',
             title: '交易处理',
-            start: '2024-08-08',
-            end: '2024-08-20',
-            duration: '12天',
-            progress: 25,
+            start: '2024-07-01',
+            end: '2024-10-31',
+            duration: '92天',
+            progress: 35,
             isCritical: false,
             children: [
               {
                 id: 'unit-3',
                 title: '订单处理',
-                start: '2024-08-08',
-                end: '2024-08-11',
-                duration: '3天',
-                progress: 50,
+                start: '2024-07-01',
+                end: '2024-08-10',
+                duration: '41天',
+                progress: 60,
                 isCritical: false,
               },
               {
                 id: 'unit-7',
                 title: '数据统计',
-                start: '2024-08-11',
-                end: '2024-08-20',
-                duration: '9天',
-                progress: 10,
+                start: '2024-08-10',
+                end: '2024-10-31',
+                duration: '82天',
+                progress: 15,
                 isCritical: false,
               },
             ],
@@ -293,7 +303,7 @@ const option = {
   records,
   taskListTable: {
     columns,
-    tableWidth: 300,
+    tableWidth: 500,
     minTableWidth: 150,
     maxTableWidth: 600,
     hierarchyExpandLevel: 3,
@@ -417,7 +427,7 @@ const option = {
   },
   markLine: [
     {
-      date: '2024-08-20',
+      date: '2024-08-15',
       scrollToMarkLine: true,
       position: 'left',
       style: {
@@ -449,7 +459,7 @@ function createGantt() {
   }
   ganttInstance = new Gantt(containerRef.value, {
     ...option,
-    dependencyLinks: showDependency.value ? dependencyLinksData : [],
+    dependency: showDependency.value ? { links: dependencyLinksData } : undefined,
   })
   ganttInstance.on('click_task_bar', (args) => {
     selectedTask.value = args.record
