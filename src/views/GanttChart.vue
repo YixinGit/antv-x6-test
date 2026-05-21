@@ -20,7 +20,26 @@
         </button>
       </div>
     </div>
-    <div ref="containerRef" class="gantt-container"></div>
+    <div class="gantt-body">
+      <div ref="containerRef" class="gantt-container"></div>
+    </div>
+    <el-drawer v-model="drawerVisible" title="任务详情" direction="rtl" size="320px">
+      <el-descriptions :column="1" border size="small">
+        <el-descriptions-item label="任务名称">{{ selectedTask?.title }}</el-descriptions-item>
+        <el-descriptions-item label="任务ID">{{ selectedTask?.id }}</el-descriptions-item>
+        <el-descriptions-item label="开始时间">{{ selectedTask?.start }}</el-descriptions-item>
+        <el-descriptions-item label="结束时间">{{ selectedTask?.end }}</el-descriptions-item>
+        <el-descriptions-item label="工期">{{ selectedTask?.duration }}</el-descriptions-item>
+        <el-descriptions-item label="进度">
+          <el-progress :percentage="selectedTask?.progress" :stroke-width="8" />
+        </el-descriptions-item>
+        <el-descriptions-item label="关键路径">
+          <el-tag :type="selectedTask?.isCritical ? 'danger' : 'info'" size="small">
+            {{ selectedTask?.isCritical ? '是' : '否' }}
+          </el-tag>
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-drawer>
   </div>
 </template>
 
@@ -32,6 +51,8 @@ const containerRef = ref(null)
 let ganttInstance = null
 const showCriticalPath = ref(false)
 const showDependency = ref(false)
+const selectedTask = ref(null)
+const drawerVisible = ref(false)
 
 const records = [
   {
@@ -430,6 +451,10 @@ function createGantt() {
     ...option,
     dependencyLinks: showDependency.value ? dependencyLinksData : [],
   })
+  ganttInstance.on('click_task_bar', (args) => {
+    selectedTask.value = args.record
+    drawerVisible.value = true
+  })
   resizeObserver = new ResizeObserver(() => {
     ganttInstance?._resize()
   })
@@ -524,11 +549,17 @@ onUnmounted(() => {
   border-color: #1a73e8;
 }
 
+.gantt-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .gantt-container {
   flex: 1;
   position: relative;
   overflow: hidden;
-  width: 100%;
   min-height: 0;
 }
 </style>
