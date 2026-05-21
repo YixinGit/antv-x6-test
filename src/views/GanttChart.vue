@@ -28,6 +28,7 @@
         <button class="action-btn" @click="zoomReset" title="重置">
           适应
         </button>
+        <span class="zoom-label">{{ zoomPercent }}%</span>
       </div>
     </div>
     <div class="gantt-body">
@@ -56,6 +57,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Gantt } from '@visactor/vtable-gantt'
+import { ZoomIn, ZoomOut } from '@element-plus/icons-vue'
 
 const containerRef = ref(null)
 let ganttInstance = null
@@ -63,6 +65,7 @@ const showCriticalPath = ref(false)
 const showDependency = ref(false)
 const selectedTask = ref(null)
 const drawerVisible = ref(false)
+const zoomPercent = ref(100)
 
 const records = [
   {
@@ -424,6 +427,90 @@ const option = {
         },
       },
     ],
+    zoomScale: {
+      enabled: true,
+      minMillisecondsPerPixel: 3600000,
+      maxMillisecondsPerPixel: 86400000,
+      levels: [
+        [
+          {
+            unit: 'quarter',
+            step: 1,
+            format(date) {
+              return `Q${date.dateIndex}`
+            },
+            style: {
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: '#333',
+              textAlign: 'center',
+              textBaseline: 'middle',
+              backgroundColor: '#dce1e8',
+            },
+          },
+          {
+            unit: 'month',
+            step: 1,
+            format(date) {
+              return `${date.dateIndex}月`
+            },
+            style: {
+              fontSize: 12,
+              color: '#666',
+              textAlign: 'center',
+              textBaseline: 'middle',
+            },
+          },
+        ],
+        [
+          {
+            unit: 'month',
+            step: 1,
+            format(date) {
+              return `${date.dateIndex}月`
+            },
+            style: {
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: '#333',
+              textAlign: 'center',
+              textBaseline: 'middle',
+              backgroundColor: '#dce1e8',
+            },
+          },
+          {
+            unit: 'day',
+            step: 1,
+            format(date) {
+              return date.dateIndex.toString()
+            },
+            style: {
+              fontSize: 12,
+              color: '#666',
+              textAlign: 'center',
+              textBaseline: 'middle',
+            },
+          },
+        ],
+        [
+          {
+            unit: 'day',
+            step: 1,
+            format(date) {
+              return `${date.dateIndex}日`
+            },
+            style: {
+              fontSize: 14,
+              fontWeight: 'bold',
+              color: '#333',
+              textAlign: 'center',
+              textBaseline: 'middle',
+              backgroundColor: '#dce1e8',
+            },
+          },
+        ],
+      ],
+    },
   },
   markLine: [
     {
@@ -481,6 +568,21 @@ function toggleDependency() {
   createGantt()
 }
 
+function zoomIn() {
+  ganttInstance?.zoomScaleManager?.zoomByPercentage(10)
+  zoomPercent.value = Math.min(zoomPercent.value + 10, 300)
+}
+
+function zoomOut() {
+  ganttInstance?.zoomScaleManager?.zoomByPercentage(-10)
+  zoomPercent.value = Math.max(zoomPercent.value - 10, 30)
+}
+
+function zoomReset() {
+  zoomPercent.value = 100
+  createGantt()
+}
+
 onMounted(() => {
   createGantt()
 })
@@ -534,7 +636,21 @@ onUnmounted(() => {
 .header-actions {
   margin-left: auto;
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.action-divider {
+  width: 1px;
+  height: 20px;
+  background: #d3d7de;
+}
+
+.zoom-label {
+  font-size: 12px;
+  color: #999;
+  min-width: 36px;
+  text-align: center;
 }
 
 .action-btn {
