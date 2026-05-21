@@ -1,7 +1,6 @@
 <template>
-  <FlowAssembly />
+  <router-view />
 </template>
 
 <script setup>
-import FlowAssembly from './views/FlowAssembly.vue'
 </script>
